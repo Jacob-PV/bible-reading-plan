@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { Reading } from '@/types';
+import { getNoteForReading, saveNote } from '@/lib/storage';
 
 interface TodayReadingProps {
   reading: Reading;
   isCompleted: boolean;
   onComplete: () => void;
+  onCompleteAndContinue?: () => void;
   currentDay: number;
   totalDays: number;
 }
@@ -16,11 +18,37 @@ export default function TodayReading({
   reading,
   isCompleted,
   onComplete,
+  onCompleteAndContinue,
   currentDay,
   totalDays,
 }: TodayReadingProps) {
   const [showNotes, setShowNotes] = useState(false);
   const [notes, setNotes] = useState('');
+
+  // Load existing note when component mounts or reading changes
+  useEffect(() => {
+    const existingNote = getNoteForReading(reading.id);
+    if (existingNote) {
+      setNotes(existingNote.content);
+    } else {
+      setNotes('');
+    }
+  }, [reading.id]);
+
+  const handleSaveNotes = () => {
+    const now = new Date().toISOString();
+    const existingNote = getNoteForReading(reading.id);
+
+    const note = {
+      id: existingNote?.id || `note-${reading.id}-${Date.now()}`,
+      readingId: reading.id,
+      content: notes,
+      createdAt: existingNote?.createdAt || now,
+      updatedAt: now,
+    };
+
+    saveNote(note);
+  };
 
   return (
     <div className="reading-card max-w-3xl mx-auto">
@@ -37,14 +65,14 @@ export default function TodayReading({
         <button
           onClick={onComplete}
           disabled={isCompleted}
-          className={`flex-shrink-0 ml-6 w-14 h-14 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
+          className={`flex-shrink-0 ml-6 w-16 h-16 rounded-full border-3 flex items-center justify-center transition-all duration-300 shadow-lg ${
             isCompleted
-              ? 'bg-livingGreen border-livingGreen text-white scale-100'
-              : 'border-sacredGold hover:bg-sacredGold hover:border-sacredGold hover:text-white hover:scale-105 active:scale-95'
+              ? 'bg-livingGreen border-livingGreen text-white scale-100 shadow-livingGreen/30'
+              : 'border-sacredGold bg-white hover:bg-sacredGold hover:border-sacredGold hover:text-white hover:scale-110 active:scale-95 shadow-sacredGold/20 hover:shadow-xl hover:shadow-sacredGold/40'
           }`}
           aria-label={isCompleted ? 'Reading completed' : 'Mark reading as complete'}
         >
-          {isCompleted && <Check size={28} strokeWidth={3} />}
+          {isCompleted && <Check size={32} strokeWidth={3} />}
         </button>
       </div>
 
@@ -80,7 +108,7 @@ export default function TodayReading({
               <span className="text-sm text-stoneGray">
                 {notes.length} / 5000 characters
               </span>
-              <button className="btn-ghost text-sm">Save Notes</button>
+              <button onClick={handleSaveNotes} className="btn-ghost text-sm">Save Notes</button>
             </div>
           </div>
         )}
@@ -88,10 +116,20 @@ export default function TodayReading({
 
       {isCompleted && (
         <div className="mt-6 p-4 bg-livingGreen/10 border border-livingGreen/20 rounded-lg">
-          <p className="text-livingGreen font-medium flex items-center gap-2">
-            <Check size={20} />
-            Reading completed! Keep up your great work.
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-livingGreen font-medium flex items-center gap-2">
+              <Check size={20} />
+              Reading completed! Keep up your great work.
+            </p>
+            {onCompleteAndContinue && currentDay < totalDays && (
+              <button
+                onClick={onCompleteAndContinue}
+                className="btn-primary text-sm"
+              >
+                Continue to Next Day
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

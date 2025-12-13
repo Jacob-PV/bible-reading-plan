@@ -21,6 +21,7 @@ export default function Home() {
 
     if (savedProgress) {
       setProgress(savedProgress);
+      setShowPlanSelector(false); // Explicitly hide selector when plan exists
 
       // Load current plan
       const plans = getAllPlans();
@@ -62,6 +63,7 @@ export default function Home() {
 
     const now = new Date().toISOString();
     const newCompletedReadings = [...progress.completedReadings, readingId];
+    const newCompletedDates = [...progress.completedDates, now];
 
     // Simple streak calculation: increment if not already completed today
     const newStreak = progress.currentStreak + 1;
@@ -70,6 +72,7 @@ export default function Home() {
     const updatedProgress: Progress = {
       ...progress,
       completedReadings: newCompletedReadings,
+      completedDates: newCompletedDates,
       currentStreak: newStreak,
       longestStreak: newLongestStreak,
       lastReadingDate: now,
@@ -78,6 +81,37 @@ export default function Home() {
 
     saveProgress(updatedProgress);
     setProgress(updatedProgress);
+  };
+
+  const handleCompleteAndContinue = () => {
+    if (!progress || !currentPlan || !todaysReading) return;
+
+    // Complete current reading if not already completed
+    if (!progress.completedReadings.includes(todaysReading.id)) {
+      handleCompleteReading(todaysReading.id);
+    }
+
+    // Move to next day
+    const currentDay = calculateCurrentDay(progress.startDate);
+    const nextDay = currentDay + 1;
+
+    if (nextDay <= currentPlan.totalDays) {
+      // Advance start date by one day to simulate skipping ahead
+      const newStartDate = new Date(progress.startDate);
+      newStartDate.setDate(newStartDate.getDate() - 1);
+
+      const updatedProgress: Progress = {
+        ...progress,
+        startDate: newStartDate.toISOString(),
+      };
+
+      saveProgress(updatedProgress);
+      setProgress(updatedProgress);
+
+      // Load next reading
+      const nextReading = getReadingByDay(currentPlan, nextDay);
+      setTodaysReading(nextReading);
+    }
   };
 
   if (showPlanSelector) {
@@ -121,6 +155,7 @@ export default function Home() {
           reading={todaysReading}
           isCompleted={progress.completedReadings.includes(todaysReading.id)}
           onComplete={() => handleCompleteReading(todaysReading.id)}
+          onCompleteAndContinue={handleCompleteAndContinue}
           currentDay={calculateCurrentDay(progress.startDate)}
           totalDays={currentPlan.totalDays}
         />

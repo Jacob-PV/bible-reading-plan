@@ -28,6 +28,11 @@ const config: Config = {
         card: '0 4px 20px rgba(90, 74, 59, 0.08)',
         cardHover: '0 6px 24px rgba(90, 74, 59, 0.12)',
         goldGlow: '0 4px 20px rgba(196, 148, 29, 0.2)',
+        glass: '0 8px 32px 0 rgba(90, 74, 59, 0.1)',
+        'glass-gold': '0 8px 32px 0 rgba(196, 148, 29, 0.15)',
+      },
+      backdropBlur: {
+        xs: '2px',
       },
     },
   },

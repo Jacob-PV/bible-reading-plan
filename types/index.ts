@@ -20,6 +20,7 @@ export interface Progress {
   userId: string;
   currentPlanId: string;
   completedReadings: string[];
+  completedDates: string[]; // Array of ISO date strings for each completed reading
   currentStreak: number;
   longestStreak: number;
   lastReadingDate: string | null;

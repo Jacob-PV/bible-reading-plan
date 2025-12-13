@@ -55,13 +55,15 @@
   }
 
   .reading-card {
-    @apply bg-white rounded-xl p-10 shadow-card transition-all duration-300;
+    @apply bg-white/90 backdrop-blur-sm rounded-xl p-10 shadow-card transition-all duration-300;
     border: 1px solid rgba(90, 74, 59, 0.12);
+    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 247, 242, 0.9) 100%);
   }
 
   .reading-card:hover {
-    box-shadow: 0 6px 24px rgba(90, 74, 59, 0.12);
-    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(90, 74, 59, 0.15), 0 2px 8px rgba(196, 148, 29, 0.08);
+    transform: translateY(-3px);
+    border-color: rgba(196, 148, 29, 0.2);
   }
 
   .tag {
@@ -113,6 +115,20 @@
   .fade-in-up-delay-3 {
     animation: fadeInUp 0.6s ease-out 0.3s forwards;
     opacity: 0;
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  .glass-card-dark {
+    background: rgba(90, 74, 59, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(90, 74, 59, 0.1);
   }
 }
 

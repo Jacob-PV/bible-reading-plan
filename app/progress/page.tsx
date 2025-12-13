@@ -2,28 +2,45 @@
 
 import { useEffect, useState } from 'react';
 import { loadProgress } from '@/lib/storage';
-import { Progress } from '@/types';
+import { Progress, ReadingPlan, Reading } from '@/types';
 import ProgressStreak from '@/components/ProgressStreak';
 import { getCompletionPercentage } from '@/lib/dateUtils';
-import { getAllPlans } from '@/lib/readingPlans';
+import { getAllPlans, getPlanById } from '@/lib/readingPlans';
+import { Calendar, Book } from 'lucide-react';
 
 export default function ProgressPage() {
   const [progress, setProgress] = useState<Progress | null>(null);
   const [completionPercentage, setCompletionPercentage] = useState(0);
+  const [currentPlan, setCurrentPlan] = useState<ReadingPlan | null>(null);
+  const [recentReadings, setRecentReadings] = useState<Array<{ reading: Reading; completedDate: string }>>([]);
 
   useEffect(() => {
     const savedProgress = loadProgress();
     if (savedProgress) {
       setProgress(savedProgress);
 
-      const plans = getAllPlans();
-      const plan = plans.find(p => p.id === savedProgress.currentPlanId);
+      const plan = getPlanById(savedProgress.currentPlanId);
       if (plan) {
+        setCurrentPlan(plan);
         const percentage = getCompletionPercentage(
           savedProgress.completedReadings.length,
           plan.totalDays
         );
         setCompletionPercentage(percentage);
+
+        // Get recent completed readings (last 10)
+        const recent = savedProgress.completedReadings
+          .slice(-10)
+          .reverse()
+          .map((readingId, index) => {
+            const reading = plan.readings.find(r => r.id === readingId);
+            const dateIndex = savedProgress.completedReadings.indexOf(readingId);
+            const completedDate = savedProgress.completedDates?.[dateIndex] || '';
+            return reading ? { reading, completedDate } : null;
+          })
+          .filter((item): item is { reading: Reading; completedDate: string } => item !== null);
+
+        setRecentReadings(recent);
       }
     }
   }, []);
@@ -98,6 +115,66 @@ export default function ProgressPage() {
           </div>
         </div>
       </div>
+
+      {recentReadings.length > 0 && (
+        <div className="bg-white border border-deepEarth/12 rounded-xl p-8 fade-in-up-delay-3">
+          <h2 className="text-2xl font-bold text-deepEarth mb-6">Reading History</h2>
+          <div className="space-y-3">
+            {recentReadings.map(({ reading, completedDate }) => {
+              const date = completedDate ? new Date(completedDate) : null;
+              const formattedDate = date
+                ? date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })
+                : 'Unknown';
+
+              return (
+                <div
+                  key={reading.id}
+                  className="flex items-start gap-4 p-4 bg-parchment rounded-lg hover:bg-parchment/70 transition-colors"
+                >
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-livingGreen/10 border-2 border-livingGreen flex items-center justify-center">
+                    <Book size={20} className="text-livingGreen" />
+                  </div>
+
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-sm font-semibold text-sacredGold">
+                        Day {reading.day}
+                      </p>
+                      <div className="flex items-center gap-1 text-xs text-stoneGray">
+                        <Calendar size={14} />
+                        {formattedDate}
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-scripture text-deepEarth">
+                      {reading.passages.join(', ')}
+                    </h3>
+
+                    {reading.studyTags && reading.studyTags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {reading.studyTags.map((tag) => (
+                          <span key={tag} className="tag text-xs">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {progress.completedReadings.length > 10 && (
+            <p className="text-center text-sm text-stoneGray mt-4">
+              Showing 10 most recent readings
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

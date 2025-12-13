@@ -32,6 +32,7 @@ export function createDefaultProgress(planId: string): Progress {
     userId: generateUserId(),
     currentPlanId: planId,
     completedReadings: [],
+    completedDates: [],
     currentStreak: 0,
     longestStreak: 0,
     lastReadingDate: null,
