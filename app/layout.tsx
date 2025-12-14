@@ -1,17 +1,21 @@
+'use client';
+
+import { useEffect } from 'react';
 import type { Metadata } from 'next'
 import './globals.css'
 import Navigation from '@/components/Navigation'
-
-export const metadata: Metadata = {
-  title: 'Bible Reading Plan & Study Tracker',
-  description: 'Build consistent Bible reading habits with daily plans, progress tracking, and study focus.',
-}
+import { initializeNotifications } from '@/lib/notifications';
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  useEffect(() => {
+    // Initialize notifications on app load
+    initializeNotifications();
+  }, []);
+
   return (
     <html lang="en">
       <body>

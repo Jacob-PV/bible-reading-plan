@@ -1,4 +1,4 @@
-import { differenceInDays, format, parseISO, isToday, isBefore, startOfDay } from 'date-fns';
+import { differenceInDays, format, parseISO, isToday, isBefore, startOfDay, isSameDay } from 'date-fns';
 
 export function calculateCurrentDay(startDate: string): number {
   const start = parseISO(startDate);
@@ -79,4 +79,27 @@ export function getTodaysDateString(): string {
 export function getCompletionPercentage(completedCount: number, totalDays: number): number {
   if (totalDays === 0) return 0;
   return Math.round((completedCount / totalDays) * 100);
+}
+
+export function hasReadToday(completedDates: string[]): boolean {
+  if (completedDates.length === 0) return false;
+
+  const today = startOfDay(new Date());
+
+  return completedDates.some(dateStr => {
+    const completedDate = startOfDay(parseISO(dateStr));
+    return isSameDay(completedDate, today);
+  });
+}
+
+export function shouldIncrementStreak(completedDates: string[], lastReadingDate: string | null): boolean {
+  // If no reading completed yet, should increment
+  if (!lastReadingDate) return true;
+
+  // Check if user has already read today
+  if (hasReadToday(completedDates)) {
+    return false; // Don't increment if already read today
+  }
+
+  return true;
 }

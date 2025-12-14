@@ -1,16 +1,30 @@
-# Future Updates
+# Future Updates for Bible Reading Plan
 
-## Bugs
-- When adding a note about a reading, it doesn't actually save
-- It gives you an option to start a plan you have already started
+This file tracks requested updates, bug fixes, and improvements for the Bible Reading Plan app.
 
-## Improvements
-- Should let you skip ahead to the next reading week if you want to read more than one passage a day
-- Should let you look ahead in the plan
-- Should be able to look at past readings to view progress and notes
-- Add daily notifications
-- Add custom plans (pick what you want to read each day)
-- Make it more obvious for how a user can check off that they completed the reading today
+## Bugs to Fix
+
+- [ ] The "Save Notes" button doesn't save the note
+- [ ] There is no way to access the plan-view or create-plan pages
+- [ ] After creating a custom plan, it doesn't show up on the plans page
+- [ ] The "Day Streak" should not update if you skip ahead to the next day and do that reading. It should only update once per calandar day.
+
+---
+
+## Improvements & New Features
+
+- [ ] Change away from the brown theme, pick a color that is more modern but still matches the vibes of the website
+- [ ] Making the "reading completed" checkbox bigger didn't make it more obvious for what the functionality of that button was. Update the button so it is obviouse that you need to check it when you complete the reading, and make it obvious what the button does
+- [ ] I don't see where I can set up notifications, make it more obvious and provide the user a way to set it up/enable it
+
+---
 
 ## General Notes
-- Use a more modern theme
+
+---
+
+**Instructions:**
+1. Add bugs, improvements, or notes as you discover them
+2. Use checkboxes [ ] for items to track
+3. Be specific and descriptive
+4. When ready to implement, run: `@update-orchestrator update bible-reading-plan`

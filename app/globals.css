@@ -6,79 +6,79 @@
 
 @layer base {
   :root {
-    --color-sacred-gold: #C4941D;
-    --color-deep-earth: #5A4A3B;
-    --color-spiritual-blue: #4A7C9C;
-    --color-parchment: #FAF7F2;
-    --color-ink-black: #2B2418;
+    --color-primary: #8B5CF6;
+    --color-primary-light: #F5F3FF;
+    --color-accent: #F59E0B;
+    --color-success: #10B981;
+    --color-neutral: #374151;
+    --color-bg: #F9FAFB;
   }
 
   * {
-    border-color: rgba(90, 74, 59, 0.1);
+    border-color: rgba(229, 231, 235, 0.8);
   }
 
   body {
-    @apply bg-parchment text-inkBlack font-body;
-    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
+    @apply bg-neutral-50 text-neutral-900 font-body;
+    background: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading text-deepEarth;
+    @apply font-heading text-neutral-900;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-sacredGold text-white px-8 py-3.5 rounded-lg font-semibold transition-all duration-200 shadow-md;
+    @apply bg-primary-600 text-white px-8 py-3.5 rounded-lg font-semibold transition-all duration-200 shadow-md;
   }
 
   .btn-primary:hover {
-    background-color: rgba(196, 148, 29, 0.9);
+    @apply bg-primary-700;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(196, 148, 29, 0.35);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
   }
 
   .btn-secondary {
-    @apply bg-transparent text-deepEarth px-8 py-3.5 rounded-lg font-semibold border-2 border-deepEarth transition-all duration-200;
+    @apply bg-transparent text-neutral-700 px-8 py-3.5 rounded-lg font-semibold border-2 border-neutral-300 transition-all duration-200;
   }
 
   .btn-secondary:hover {
-    @apply bg-deepEarth text-white;
+    @apply bg-neutral-100 border-neutral-400;
   }
 
   .btn-ghost {
-    @apply bg-transparent text-spiritualBlue px-6 py-3 rounded-md font-medium transition-all duration-200;
+    @apply bg-transparent text-primary-600 px-6 py-3 rounded-md font-medium transition-all duration-200;
   }
 
   .btn-ghost:hover {
-    background-color: rgba(74, 124, 156, 0.08);
+    @apply bg-primary-50;
   }
 
   .reading-card {
-    @apply bg-white/90 backdrop-blur-sm rounded-xl p-10 shadow-card transition-all duration-300;
-    border: 1px solid rgba(90, 74, 59, 0.12);
-    background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 247, 242, 0.9) 100%);
+    @apply bg-white rounded-xl p-10 shadow-card transition-all duration-300;
+    border: 1px solid rgba(229, 231, 235, 0.8);
   }
 
   .reading-card:hover {
-    box-shadow: 0 8px 32px rgba(90, 74, 59, 0.15), 0 2px 8px rgba(196, 148, 29, 0.08);
+    box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15), 0 2px 8px rgba(139, 92, 246, 0.08);
     transform: translateY(-3px);
-    border-color: rgba(196, 148, 29, 0.2);
+    border-color: rgba(139, 92, 246, 0.3);
   }
 
   .tag {
-    @apply inline-block text-deepEarth px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all duration-150;
-    background-color: rgba(196, 148, 29, 0.1);
-    border: 1px solid rgba(196, 148, 29, 0.2);
+    @apply inline-block text-neutral-700 px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all duration-150;
+    background-color: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.2);
   }
 
   .tag:hover {
-    background-color: rgba(196, 148, 29, 0.15);
+    background-color: rgba(139, 92, 246, 0.15);
   }
 
   .tag-selected {
-    @apply bg-sacredGold text-white;
-    border-color: #C4941D;
+    @apply bg-primary-600 text-white;
+    border-color: #8B5CF6;
   }
 }
 
@@ -98,8 +98,21 @@
     }
   }
 
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
   .fade-in-up {
     animation: fadeInUp 0.6s ease-out forwards;
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out forwards;
   }
 
   .fade-in-up-delay-1 {

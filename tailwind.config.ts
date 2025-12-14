@@ -9,14 +9,42 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        sacredGold: '#C4941D',
-        deepEarth: '#5A4A3B',
-        spiritualBlue: '#4A7C9C',
-        parchment: '#FAF7F2',
-        inkBlack: '#2B2418',
-        stoneGray: '#8B8070',
-        livingGreen: '#5F8A5F',
-        gentleAmber: '#D4A574',
+        primary: {
+          50: '#F5F3FF',
+          100: '#EDE9FE',
+          500: '#8B5CF6',
+          600: '#7C3AED',
+          700: '#6D28D9',
+        },
+        accent: {
+          50: '#FFFBEB',
+          100: '#FEF3C7',
+          500: '#F59E0B',
+          600: '#D97706',
+          700: '#B45309',
+        },
+        success: {
+          50: '#ECFDF5',
+          500: '#10B981',
+          600: '#059669',
+        },
+        neutral: {
+          50: '#F9FAFB',
+          100: '#F3F4F6',
+          200: '#E5E7EB',
+          500: '#6B7280',
+          700: '#374151',
+          900: '#111827',
+        },
+        // Legacy color mappings for compatibility
+        sacredGold: '#F59E0B',
+        deepEarth: '#374151',
+        spiritualBlue: '#8B5CF6',
+        parchment: '#F9FAFB',
+        inkBlack: '#111827',
+        stoneGray: '#6B7280',
+        livingGreen: '#10B981',
+        gentleAmber: '#F59E0B',
         softBurgundy: '#9B5B5B',
       },
       fontFamily: {

@@ -1,8 +1,11 @@
 import plansData from '@/data/plans.json';
 import { ReadingPlan, Reading } from '@/types';
+import { getCustomPlans } from './customPlans';
 
 export function getAllPlans(): ReadingPlan[] {
-  return plansData.plans as ReadingPlan[];
+  const defaultPlans = plansData.plans as ReadingPlan[];
+  const customPlans = getCustomPlans();
+  return [...defaultPlans, ...customPlans];
 }
 
 export function getPlanById(id: string): ReadingPlan | null {

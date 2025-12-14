@@ -3,17 +3,21 @@
 import { useEffect, useState } from 'react';
 import { loadProgress, saveProgress, createDefaultProgress } from '@/lib/storage';
 import { getAllPlans, getReadingByDay } from '@/lib/readingPlans';
-import { calculateCurrentDay } from '@/lib/dateUtils';
+import { calculateCurrentDay, hasReadToday, shouldIncrementStreak } from '@/lib/dateUtils';
 import { Progress, Reading, ReadingPlan } from '@/types';
 import TodayReading from '@/components/TodayReading';
 import ProgressStreak from '@/components/ProgressStreak';
 import PlanSelector from '@/components/PlanSelector';
+import { Bell, X } from 'lucide-react';
+import Link from 'next/link';
+import { canShowNotifications, getNotificationSettings } from '@/lib/notifications';
 
 export default function Home() {
   const [progress, setProgress] = useState<Progress | null>(null);
   const [currentPlan, setCurrentPlan] = useState<ReadingPlan | null>(null);
   const [todaysReading, setTodaysReading] = useState<Reading | null>(null);
   const [showPlanSelector, setShowPlanSelector] = useState(false);
+  const [showNotificationBanner, setShowNotificationBanner] = useState(false);
 
   useEffect(() => {
     // Load progress from localStorage
@@ -39,7 +43,21 @@ export default function Home() {
       // No progress saved - show plan selector
       setShowPlanSelector(true);
     }
+
+    // Check if we should show notification banner
+    const notificationSettings = getNotificationSettings();
+    const hasNotifications = canShowNotifications();
+    const bannerDismissed = localStorage.getItem('notificationBannerDismissed');
+
+    if (!notificationSettings.enabled && !hasNotifications && !bannerDismissed) {
+      setShowNotificationBanner(true);
+    }
   }, []);
+
+  const handleDismissNotificationBanner = () => {
+    setShowNotificationBanner(false);
+    localStorage.setItem('notificationBannerDismissed', 'true');
+  };
 
   const handleSelectPlan = (planId: string) => {
     const newProgress = createDefaultProgress(planId);
@@ -65,8 +83,9 @@ export default function Home() {
     const newCompletedReadings = [...progress.completedReadings, readingId];
     const newCompletedDates = [...progress.completedDates, now];
 
-    // Simple streak calculation: increment if not already completed today
-    const newStreak = progress.currentStreak + 1;
+    // Only increment streak if it's a new calendar day
+    const incrementStreak = shouldIncrementStreak(progress.completedDates, progress.lastReadingDate);
+    const newStreak = incrementStreak ? progress.currentStreak + 1 : progress.currentStreak;
     const newLongestStreak = Math.max(newStreak, progress.longestStreak);
 
     const updatedProgress: Progress = {
@@ -142,6 +161,29 @@ export default function Home() {
 
   return (
     <div className="space-y-8">
+      {/* Notification Prompt Banner */}
+      {showNotificationBanner && (
+        <div className="bg-primary-50 border-2 border-primary-200 rounded-xl p-6 fade-in-up flex items-start gap-4">
+          <Bell className="text-primary-600 flex-shrink-0 mt-1" size={24} />
+          <div className="flex-1">
+            <h3 className="font-bold text-neutral-900 mb-1">Stay on Track with Reminders</h3>
+            <p className="text-sm text-neutral-600 mb-3">
+              Enable notifications to receive daily reading reminders and never miss a day.
+            </p>
+            <Link href="/settings" className="inline-block btn-primary text-sm px-6 py-2">
+              Enable Notifications
+            </Link>
+          </div>
+          <button
+            onClick={handleDismissNotificationBanner}
+            className="text-neutral-400 hover:text-neutral-600 transition-colors flex-shrink-0"
+            aria-label="Dismiss notification banner"
+          >
+            <X size={20} />
+          </button>
+        </div>
+      )}
+
       <div className="fade-in-up">
         <ProgressStreak
           currentStreak={progress.currentStreak}
@@ -158,10 +200,11 @@ export default function Home() {
           onCompleteAndContinue={handleCompleteAndContinue}
           currentDay={calculateCurrentDay(progress.startDate)}
           totalDays={currentPlan.totalDays}
+          hasReadToday={hasReadToday(progress.completedDates)}
         />
       </div>
 
-      <div className="fade-in-up-delay-2 text-center text-stoneGray">
+      <div className="fade-in-up-delay-2 text-center text-neutral-500">
         <p className="text-sm">
           Reading plan: {currentPlan.name} • Day {calculateCurrentDay(progress.startDate)} of {currentPlan.totalDays}
         </p>

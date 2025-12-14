@@ -3,6 +3,8 @@
 import PlanSelector from '@/components/PlanSelector';
 import { loadProgress, saveProgress, createDefaultProgress } from '@/lib/storage';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { BookOpen, Plus } from 'lucide-react';
 
 export default function PlansPage() {
   const router = useRouter();
@@ -36,6 +38,17 @@ export default function PlansPage() {
         <p className="text-lg text-stoneGray max-w-2xl mx-auto">
           Choose a plan that matches your goals and commitment level
         </p>
+      </div>
+
+      <div className="flex flex-wrap gap-4 justify-center mb-8 fade-in-up-delay-1">
+        <Link href="/plan-view" className="btn-secondary flex items-center gap-2">
+          <BookOpen size={20} />
+          View Current Plan Details
+        </Link>
+        <Link href="/create-plan" className="btn-primary flex items-center gap-2">
+          <Plus size={20} />
+          Create Custom Plan
+        </Link>
       </div>
 
       <PlanSelector onSelectPlan={handleSelectPlan} />
