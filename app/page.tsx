@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { loadProgress, saveProgress, createDefaultProgress } from '@/lib/storage';
+import { loadProgress, saveProgress, createDefaultProgress, getCurrentPlanProgress } from '@/lib/storage';
 import { getAllPlans, getReadingByDay } from '@/lib/readingPlans';
 import { calculateCurrentDay, hasReadToday, shouldIncrementStreak } from '@/lib/dateUtils';
-import { Progress, Reading, ReadingPlan } from '@/types';
+import { MultiPlanProgress, PlanProgress, Reading, ReadingPlan } from '@/types';
 import TodayReading from '@/components/TodayReading';
 import ProgressStreak from '@/components/ProgressStreak';
 import PlanSelector from '@/components/PlanSelector';
@@ -13,7 +13,8 @@ import Link from 'next/link';
 import { canShowNotifications, getNotificationSettings } from '@/lib/notifications';
 
 export default function Home() {
-  const [progress, setProgress] = useState<Progress | null>(null);
+  const [progress, setProgress] = useState<MultiPlanProgress | null>(null);
+  const [currentPlanData, setCurrentPlanData] = useState<PlanProgress | null>(null);
   const [currentPlan, setCurrentPlan] = useState<ReadingPlan | null>(null);
   const [todaysReading, setTodaysReading] = useState<Reading | null>(null);
   const [showPlanSelector, setShowPlanSelector] = useState(false);
@@ -27,15 +28,21 @@ export default function Home() {
       setProgress(savedProgress);
       setShowPlanSelector(false); // Explicitly hide selector when plan exists
 
+      // Get current plan progress
+      const planProgress = getCurrentPlanProgress(savedProgress);
+      if (planProgress) {
+        setCurrentPlanData(planProgress);
+      }
+
       // Load current plan
       const plans = getAllPlans();
       const plan = plans.find(p => p.id === savedProgress.currentPlanId);
 
-      if (plan) {
+      if (plan && planProgress) {
         setCurrentPlan(plan);
 
         // Calculate current day and get today's reading
-        const currentDay = calculateCurrentDay(savedProgress.startDate);
+        const currentDay = calculateCurrentDay(planProgress.startDate);
         const reading = getReadingByDay(plan, currentDay);
         setTodaysReading(reading);
       }
@@ -77,55 +84,76 @@ export default function Home() {
   };
 
   const handleCompleteReading = (readingId: string) => {
-    if (!progress || !currentPlan) return;
+    if (!progress || !currentPlan || !currentPlanData) return;
 
     const now = new Date().toISOString();
-    const newCompletedReadings = [...progress.completedReadings, readingId];
-    const newCompletedDates = [...progress.completedDates, now];
+    const newCompletedReadings = [...currentPlanData.completedReadings, readingId];
+    const newCompletedDates = [...currentPlanData.completedDates, now];
 
     // Only increment streak if it's a new calendar day
-    const incrementStreak = shouldIncrementStreak(progress.completedDates, progress.lastReadingDate);
-    const newStreak = incrementStreak ? progress.currentStreak + 1 : progress.currentStreak;
-    const newLongestStreak = Math.max(newStreak, progress.longestStreak);
+    const incrementStreak = shouldIncrementStreak(
+      currentPlanData.completedDates,
+      currentPlanData.lastReadingDate
+    );
+    const newStreak = incrementStreak ? currentPlanData.currentStreak + 1 : currentPlanData.currentStreak;
+    const newLongestStreak = Math.max(newStreak, currentPlanData.longestStreak);
 
-    const updatedProgress: Progress = {
-      ...progress,
+    const updatedPlanProgress: PlanProgress = {
+      ...currentPlanData,
       completedReadings: newCompletedReadings,
       completedDates: newCompletedDates,
       currentStreak: newStreak,
       longestStreak: newLongestStreak,
       lastReadingDate: now,
-      totalReadings: progress.totalReadings + 1,
+      totalReadings: currentPlanData.totalReadings + 1,
+    };
+
+    const updatedProgress: MultiPlanProgress = {
+      ...progress,
+      planProgress: {
+        ...progress.planProgress,
+        [progress.currentPlanId]: updatedPlanProgress,
+      },
     };
 
     saveProgress(updatedProgress);
     setProgress(updatedProgress);
+    setCurrentPlanData(updatedPlanProgress);
   };
 
   const handleCompleteAndContinue = () => {
-    if (!progress || !currentPlan || !todaysReading) return;
+    if (!progress || !currentPlan || !todaysReading || !currentPlanData) return;
 
     // Complete current reading if not already completed
-    if (!progress.completedReadings.includes(todaysReading.id)) {
+    if (!currentPlanData.completedReadings.includes(todaysReading.id)) {
       handleCompleteReading(todaysReading.id);
     }
 
     // Move to next day
-    const currentDay = calculateCurrentDay(progress.startDate);
+    const currentDay = calculateCurrentDay(currentPlanData.startDate);
     const nextDay = currentDay + 1;
 
     if (nextDay <= currentPlan.totalDays) {
       // Advance start date by one day to simulate skipping ahead
-      const newStartDate = new Date(progress.startDate);
+      const newStartDate = new Date(currentPlanData.startDate);
       newStartDate.setDate(newStartDate.getDate() - 1);
 
-      const updatedProgress: Progress = {
-        ...progress,
+      const updatedPlanProgress: PlanProgress = {
+        ...currentPlanData,
         startDate: newStartDate.toISOString(),
+      };
+
+      const updatedProgress: MultiPlanProgress = {
+        ...progress,
+        planProgress: {
+          ...progress.planProgress,
+          [progress.currentPlanId]: updatedPlanProgress,
+        },
       };
 
       saveProgress(updatedProgress);
       setProgress(updatedProgress);
+      setCurrentPlanData(updatedPlanProgress);
 
       // Load next reading
       const nextReading = getReadingByDay(currentPlan, nextDay);
@@ -149,7 +177,7 @@ export default function Home() {
     );
   }
 
-  if (!progress || !currentPlan || !todaysReading) {
+  if (!progress || !currentPlan || !todaysReading || !currentPlanData) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
@@ -186,27 +214,27 @@ export default function Home() {
 
       <div className="fade-in-up">
         <ProgressStreak
-          currentStreak={progress.currentStreak}
-          longestStreak={progress.longestStreak}
-          totalReadings={progress.totalReadings}
+          currentStreak={currentPlanData.currentStreak}
+          longestStreak={currentPlanData.longestStreak}
+          totalReadings={currentPlanData.totalReadings}
         />
       </div>
 
       <div className="fade-in-up-delay-1">
         <TodayReading
           reading={todaysReading}
-          isCompleted={progress.completedReadings.includes(todaysReading.id)}
+          isCompleted={currentPlanData.completedReadings.includes(todaysReading.id)}
           onComplete={() => handleCompleteReading(todaysReading.id)}
           onCompleteAndContinue={handleCompleteAndContinue}
-          currentDay={calculateCurrentDay(progress.startDate)}
+          currentDay={calculateCurrentDay(currentPlanData.startDate)}
           totalDays={currentPlan.totalDays}
-          hasReadToday={hasReadToday(progress.completedDates)}
+          hasReadToday={hasReadToday(currentPlanData.completedDates)}
         />
       </div>
 
       <div className="fade-in-up-delay-2 text-center text-neutral-500">
         <p className="text-sm">
-          Reading plan: {currentPlan.name} • Day {calculateCurrentDay(progress.startDate)} of {currentPlan.totalDays}
+          Reading plan: {currentPlan.name} • Day {calculateCurrentDay(currentPlanData.startDate)} of {currentPlan.totalDays}
         </p>
       </div>
     </div>

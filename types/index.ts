@@ -46,3 +46,21 @@ export interface StudyTag {
   name: string;
   color: string;
 }
+
+export interface PlanProgress {
+  planId: string;
+  completedReadings: string[];
+  completedDates: string[]; // Array of ISO date strings for each completed reading
+  currentStreak: number;
+  longestStreak: number;
+  lastReadingDate: string | null;
+  totalReadings: number;
+  startDate: string;
+  lastAccessedDate: string; // When this plan was last active
+}
+
+export interface MultiPlanProgress {
+  userId: string;
+  currentPlanId: string; // The currently active plan
+  planProgress: Record<string, PlanProgress>; // Map of planId to PlanProgress
+}

@@ -34,10 +34,18 @@ export default function TodayReading({
     const existingNote = getNoteForReading(reading.id);
     if (existingNote) {
       setNotes(existingNote.content);
+      // If note exists, auto-expand the notes section
+      setShowNotes(false); // Keep it collapsed initially, user can click to view
     } else {
       setNotes('');
     }
   }, [reading.id]);
+
+  // Check if a note exists for this reading
+  const hasExistingNote = () => {
+    const existingNote = getNoteForReading(reading.id);
+    return existingNote && existingNote.content.trim().length > 0;
+  };
 
   // Show tooltip for first-time users (only if not completed)
   useEffect(() => {
@@ -137,7 +145,7 @@ export default function TodayReading({
           className="flex items-center gap-2 text-spiritualBlue hover:text-spiritualBlue/80 font-medium transition-colors"
         >
           {showNotes ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-          {showNotes ? 'Hide Notes' : 'Add Notes'}
+          {showNotes ? 'Hide Notes' : hasExistingNote() ? 'View Notes' : 'Add Notes'}
         </button>
 
         {showNotes && (

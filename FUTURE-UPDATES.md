@@ -4,22 +4,23 @@ This file tracks requested updates, bug fixes, and improvements for the Bible Re
 
 ## Bugs to Fix
 
-- [ ] The "Save Notes" button doesn't save the note
-- [ ] There is no way to access the plan-view or create-plan pages
-- [ ] After creating a custom plan, it doesn't show up on the plans page
-- [ ] The "Day Streak" should not update if you skip ahead to the next day and do that reading. It should only update once per calandar day.
-
 ---
 
 ## Improvements & New Features
 
-- [ ] Change away from the brown theme, pick a color that is more modern but still matches the vibes of the website
-- [ ] Making the "reading completed" checkbox bigger didn't make it more obvious for what the functionality of that button was. Update the button so it is obviouse that you need to check it when you complete the reading, and make it obvious what the button does
-- [ ] I don't see where I can set up notifications, make it more obvious and provide the user a way to set it up/enable it
+- [ ] Make sure to save the progess of non-active plans. This includes when you switch to a new plan or complete a plan. Display this progress on the plans page. Also add the ability to reset progress.
+- [ ] Add the ability to view the notes you have added on past days readings. You should be able to see this on the "Projects" page and the "View Current Plan Details" page
+- [ ] if you have already added a note, and then hidden it, the dropdown text should say "View Notes" instead of "Add Notes"
 
 ---
 
 ## General Notes
+
+*Any general observations or ideas for future consideration*
+
+Example:
+- Consider adding...
+- Explore possibility of...
 
 ---
 
